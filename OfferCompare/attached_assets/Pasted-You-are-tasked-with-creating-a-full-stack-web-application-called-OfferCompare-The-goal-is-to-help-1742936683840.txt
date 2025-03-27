@@ -1,0 +1,158 @@
+You are tasked with creating a full-stack web application called “OfferCompare.” The goal is to help real estate listing agents and sellers collect, manage, and analyze offers on properties. The app will follow a pay-per-use model with Stripe for payments.
+Here’s what is required:
+
+1. Tech Stack
+	1	Backend:
+	◦	Node.js with Express (or NestJS if you prefer a more structured framework).
+	◦	Use TypeScript for strong typing and maintainability.
+	2	Frontend:
+	◦	React (TypeScript recommended).
+	◦	For state management, use something widely adopted (e.g., Redux or React Context).
+	3	Database:
+	◦	Propose either PostgreSQL or MongoDB, whichever you believe is simpler for this application’s data structure and queries. Provide justification or comments in the code on your choice.
+	◦	Use an ORM/ODM (e.g., Prisma for Postgres, Mongoose for MongoDB) to simplify database interactions.
+	4	Authentication:
+	◦	Integrate Google OAuth and Apple OAuth for user sign-in/sign-up.
+	◦	Use an auth library (e.g., passport or similar) or JWT-based authentication with a well-organized flow.
+	5	Payments:
+	◦	Integrate Stripe for a pay-per-use billing model.
+	◦	Implement a mechanism so that every time a user ingests or creates a new offer (or another usage event), the app will bill them. The exact usage model can be:
+	▪	A subscription plan with metered billing, OR
+	▪	A one-off charge each time they use a feature.
+	◦	Provide sample integration code and usage tracking logic.
+	6	Deployment:
+	◦	Provide a Dockerfile and a brief script or Docker Compose configuration to make it easy to run or deploy.
+	◦	Show how to set environment variables (e.g., DB credentials, Google/Apple OAuth client secrets, Stripe keys, OpenAI keys if used, etc.) in .env for both development and production.
+
+2. Core Features & Requirements
+	1	Offer Ingestion & Extraction:
+	◦	Create an endpoint or UI workflow where the user can upload a document (e.g., PDF, Docx, or text) of an offer letter.
+	◦	Use ChatGPT or another text-processing solution to extract key fields:
+	▪	Offer price
+	▪	Agent commission
+	▪	Contingencies (financial, appraisal, loan, etc.)
+	▪	Inspection requirements
+	▪	Proposed closing date
+	▪	Other relevant data points
+	◦	Show how this extracted data is stored in the database. Provide a fallback or manual form entry method in case the extraction fails.
+	2	Offer Creation:
+	◦	Provide a front-end UI to manually create an offer if there is no uploaded document.
+	◦	The user should be able to input all key fields (price, commission, contingencies, etc.) manually.
+	3	User Authentication:
+	◦	Must be able to sign in with Google or Apple accounts.
+	◦	Store user profiles in the database.
+	◦	Ensure that each user can only access offers and listings they have created or are authorized to view.
+	4	Listing Dashboards:
+	◦	Each listing (property) has its own dashboard containing:
+	▪	A summary of all offers for that property.
+	▪	Fields where the listing agent or seller can input how they weigh various priorities (e.g., offer price, net proceeds, speed/closing date, contingencies/risk tolerance, and so on).
+	◦	These priorities should feed into a scoring or insights mechanism described below.
+	5	Insights & Suggestions:
+	◦	Provide an “Insights” or “Analysis” panel in each listing’s dashboard.
+	◦	The panel should:
+	▪	Highlight the perceived risk of each offer (e.g., if an offer has a financing contingency, if the buyer is a first-time homebuyer, etc.).
+	▪	Suggest negotiation points (e.g., removing certain contingencies, adjusting closing dates).
+	▪	Present relevant comparisons (e.g., how much net proceeds differ across offers once commission/fees are accounted for).
+	6	Stripe Integration:
+	◦	Implement a pay-per-use system. For example:
+	▪	Each new offer ingestion triggers a metered usage charge or a one-time charge.
+	▪	Show how to track usage in the database so that Stripe can invoice the user.
+	◦	Provide a minimal example of how the billing can occur in real time or monthly (metered billing).
+	7	Security:
+	◦	Ensure that only logged-in users can access or modify their own data.
+	◦	Demonstrate best practices for protecting sensitive info (e.g., environment variables for keys, hashed user IDs, secure cookies or JWTs).
+	8	Documentation & Testing:
+	◦	Write clear inline documentation in the code.
+	◦	Provide a README.md that explains:
+	▪	How to set up the development environment.
+	▪	How to run tests.
+	▪	How to deploy with Docker.
+	◦	Include basic unit tests using a framework such as Jest (for backend) and React Testing Library (for frontend).
+
+3. Implementation Details & Structure
+	1	Project Structure (suggestion): java CopyEdit   .
+	2	├── backend
+	3	│   ├── src
+	4	│   │   ├── controllers
+	5	│   │   ├── routes
+	6	│   │   ├── models / prisma-schema
+	7	│   │   ├── services
+	8	│   │   └── app.ts (Express/Nest bootstrap)
+	9	│   ├── tests
+	10	│   ├── package.json
+	11	│   └── Dockerfile
+	12	├── frontend
+	13	│   ├── src
+	14	│   │   ├── components
+	15	│   │   ├── pages
+	16	│   │   ├── store (Redux or Context)
+	17	│   │   └── App.tsx
+	18	│   ├── public
+	19	│   ├── tests
+	20	│   ├── package.json
+	21	│   └── Dockerfile
+	22	├── docker-compose.yml
+	23	├── README.md
+	24	└── ...
+	25	  
+	26	Backend Endpoints (examples):
+	◦	Auth:
+	▪	POST /auth/google -> Google OAuth flow.
+	▪	POST /auth/apple -> Apple OAuth flow.
+	◦	Listing:
+	▪	POST /listings -> Create a new listing.
+	▪	GET /listings -> List all listings for the authenticated user.
+	▪	GET /listings/:id -> View single listing details & offers.
+	▪	PATCH /listings/:id -> Update listing info (e.g., user priorities).
+	◦	Offer:
+	▪	POST /offers -> Create a new offer (manual or triggered by ingestion).
+	▪	POST /offers/extract -> Upload an offer letter, then parse with ChatGPT/OpenAI.
+	▪	GET /offers/:id -> View single offer details.
+	◦	Insights:
+	▪	GET /listings/:id/insights -> Return computed insights (risk, suggestions, net proceeds, etc.).
+	◦	Billing:
+	▪	POST /billing/usage -> Example endpoint to increment usage and create a Stripe charge or usage record.
+	27	Frontend Pages:
+	◦	Sign In / Sign Up page with Google or Apple OAuth buttons.
+	◦	Dashboard page listing all user’s properties.
+	◦	Listing Details page with a table or grid of offers plus the priorities input fields and “Insights” panel.
+	◦	New Offer page with manual entry form or upload form for ingestion.
+	◦	Show basic usage of React Router for navigation.
+	28	Stripe Metered Billing:
+	◦	Demonstrate at least one scenario where each ingestion or offer creation calls a usage increment function that updates Stripe usage records or initiates a one-off payment.
+	◦	Include environment variable placeholders (STRIPE_SECRET_KEY, etc.).
+	29	ChatGPT/OpenAI Integration (if required):
+	◦	Provide a service class or function (e.g., offerExtractionService.ts) that:
+	▪	Receives text from an uploaded file.
+	▪	Calls OpenAI API for extraction.
+	▪	Maps the response to the structured data (price, contingencies, etc.).
+	▪	Saves it in the database.
+
+4. Deliverables
+	1	Complete Source Code:
+	◦	The backend code in TypeScript (Express or Nest).
+	◦	The frontend in React (TypeScript).
+	◦	Database schema or Prisma/Mongoose models.
+	◦	Example .env.example file with placeholders for environment variables.
+	2	Docker Setup:
+	◦	A Dockerfile for the backend that installs dependencies, compiles TypeScript, and runs the server.
+	◦	A Dockerfile for the frontend that builds the React app and serves it (e.g., with serve or a lightweight Node server).
+	◦	A docker-compose.yml that spins up the backend, frontend, and database.
+	3	README:
+	◦	Setup steps for local development (e.g., npm install, npm run dev).
+	◦	Steps for running via Docker.
+	◦	Explanation of environment variables and usage metering logic.
+	◦	Instructions for how to set up Google OAuth, Apple OAuth, and Stripe keys.
+	4	Tests:
+	◦	At least a few test cases for:
+	▪	Auth flows.
+	▪	Offer ingestion and extraction.
+	▪	Listing creation and priority updates.
+	▪	Stripe usage increments.
+	◦	Document how to run tests (e.g., npm run test).
+
+Final Instructions for Replit Agent:
+	•	Generate all necessary files and folders with the structure above (or your recommended variation).
+	•	Write clear, maintainable code with comments where needed.
+	•	Make sure to include placeholders or environment variables for all third-party credentials (Google, Apple, Stripe, OpenAI).
+	•	Provide minimal styling on the front end so that the flows are easy to test.
